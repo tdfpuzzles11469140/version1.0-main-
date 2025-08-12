@@ -307,12 +307,10 @@
 
 <script>
   const ADMIN_PANEL_PASSWORD = 'puzzleadmin11#';
-  const API_URL = 'https://script.google.com/macros/s/AKfycbyYSddxocaCuzUIEdgi5RbO4KUa7OPoq9LTIg2hDdOcr-QchPqUxkUAmg6zEOJNB1tdwQ/exec'; // <-- Replace with your Apps Script Web App URL
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyYSddxocaCuzUIEdgi5RbO4KUa7OPoq9LTIg2hDdOcr-QchPqUxkUAmg6zEOJNB1tdwQ/exec';
 
-  // Cached user data
   let users = [];
 
-  // Elements
   const loginUsername = document.getElementById('loginUsername');
   const loginPassword = document.getElementById('loginPassword');
   const loginBtn = document.getElementById('loginBtn');
@@ -335,7 +333,6 @@
   const signupModal = document.getElementById('signupModal');
   const closeSignup = document.getElementById('closeSignup');
 
-  // Fetch users from backend
   async function fetchUsers() {
     try {
       const resp = await fetch(`${API_URL}?action=listUsers`);
@@ -353,7 +350,6 @@
     }
   }
 
-  // Render users in admin panel
   function renderUserList() {
     if (users.length === 0) {
       userList.innerHTML = '<p>No users found.</p>';
@@ -382,7 +378,6 @@
     });
   }
 
-  // Add user via backend
   async function addUser(username, password) {
     if (!username || !password) {
       alert('Please enter username and password.');
@@ -409,7 +404,6 @@
     }
   }
 
-  // Remove user via backend
   async function removeUser(username) {
     try {
       const resp = await fetch(API_URL, {
@@ -430,7 +424,6 @@
     }
   }
 
-  // Login check
   loginBtn.addEventListener('click', async () => {
     loginMsg.textContent = '';
     const username = loginUsername.value.trim();
@@ -442,7 +435,6 @@
     }
 
     try {
-      // Fetch users fresh to be sure
       const resp = await fetch(`${API_URL}?action=listUsers`);
       const data = await resp.json();
       if (!data.users) {
@@ -460,14 +452,13 @@
       }
       loginMsg.style.color = 'green';
       loginMsg.textContent = `Welcome, ${username}! You are logged in.`;
-      // TODO: Redirect or show user area here
+      // TODO: redirect or load user content
     } catch (e) {
       loginMsg.textContent = 'Error during login.';
       console.error(e);
     }
   });
 
-  // Admin panel open
   adminBtn.addEventListener('click', () => {
     adminModal.style.display = 'flex';
     adminPassInput.value = '';
@@ -475,12 +466,10 @@
     adminContent.style.display = 'none';
   });
 
-  // Admin panel close
   closeAdmin.addEventListener('click', () => {
     adminModal.style.display = 'none';
   });
 
-  // Unlock admin
   adminLoginBtn.addEventListener('click', async () => {
     const pass = adminPassInput.value;
     if (pass !== ADMIN_PANEL_PASSWORD) {
@@ -492,26 +481,20 @@
     await fetchUsers();
   });
 
-  // Add user button
   addUserBtn.addEventListener('click', () => {
     addUser(newUserName.value.trim(), newUserPass.value.trim());
   });
 
-  // Remove user handled in renderUserList buttons
-
-  // Admin logout locks the panel
   adminLogoutBtn.addEventListener('click', () => {
     adminContent.style.display = 'none';
     adminPassInput.value = '';
     adminLoginMsg.textContent = '';
   });
 
-  // Close admin modal when clicking outside content
   adminModal.addEventListener('click', e => {
     if (e.target === adminModal) adminModal.style.display = 'none';
   });
 
-  // Signup modal open/close
   signupBtn.addEventListener('click', () => {
     signupModal.style.display = 'flex';
   });
