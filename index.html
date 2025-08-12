@@ -129,6 +129,92 @@
     .input-group {
       margin-top: 1rem;
     }
+
+    /* Signup modal styles */
+    #signupModal {
+      display:none; 
+      position:fixed; 
+      top:0; left:0; right:0; bottom:0; 
+      background:rgba(0,0,0,0.5); 
+      justify-content:center; 
+      align-items:center; 
+      z-index:1100;
+    }
+    #signupModal > div {
+      background:white; 
+      border-radius:10px; 
+      padding:2rem; 
+      max-width:400px; 
+      width:90%; 
+      position:relative; 
+      box-shadow:0 0 20px rgba(0,0,0,0.3);
+    }
+    #closeSignup {
+      position:absolute; 
+      top:10px; 
+      right:15px; 
+      background:none; 
+      border:none; 
+      font-size:24px; 
+      font-weight:bold; 
+      cursor:pointer; 
+      color:#555;
+    }
+    #closeSignup:hover {
+      color:#000;
+    }
+    #signupModal h2 {
+      color:#28a745; 
+      margin-top:0; 
+      text-align:center;
+    }
+    #signupModal div > div {
+      border:1px solid #ddd; 
+      border-radius:8px; 
+      padding:1rem; 
+      margin-bottom:1rem;
+    }
+    #signupModal div > div h3 {
+      margin:0; 
+      color:#333;
+    }
+    #signupModal div > div p {
+      margin:0.3rem 0;
+    }
+    #signupModal div > ul {
+      list-style:none; 
+      padding:0; 
+      text-align:center; 
+      margin-top:0.5rem;
+    }
+    #signupModal div > ul li a {
+      font-weight:700;
+      text-decoration:none;
+    }
+    #signupModal div > ul li:nth-child(1) a { color:#29abe0; }
+    #signupModal div > ul li:nth-child(2) a { color:#0070ba; }
+    #signupModal div > ul li:nth-child(3) a { color:#3d95ce; }
+    #signupModal div > p {
+      text-align:center; 
+      font-size:0.9rem; 
+      color:#888; 
+      margin-top:1rem;
+    }
+
+    /* Center signup button */
+    #signupBtn {
+      background:#28a745; 
+      color:white; 
+      padding:0.6rem 1rem; 
+      border:none; 
+      border-radius:6px; 
+      cursor:pointer; 
+      font-weight:700; 
+      margin: 2rem auto 0;
+      display: block;
+      width: fit-content;
+      min-width: 180px;
+    }
   </style>
 </head>
 <body>
@@ -146,6 +232,9 @@
   <div class="message" id="loginMsg"></div>
 
   <button id="adminBtn">Admin Panel</button>
+
+  <!-- Signup Button below the main login box -->
+  <button id="signupBtn">Sign Up / Subscribe</button>
 
   <!-- Admin Modal -->
   <div id="adminModal">
@@ -177,9 +266,48 @@
     </div>
   </div>
 
+  <!-- Signup Modal -->
+  <div id="signupModal">
+    <div>
+      <button id="closeSignup">&times;</button>
+      <h2>Choose Your Subscription Plan</h2>
+
+      <div>
+        <div>
+          <h3>Basic Plan</h3>
+          <p>Access to monthly digital puzzle packs.</p>
+          <strong>£3.99 / month</strong>
+        </div>
+
+        <div>
+          <h3>Premium Plan</h3>
+          <p>Includes Basic + exclusive bonus puzzles and hints.</p>
+          <strong>£6.99 / month</strong>
+        </div>
+
+        <div>
+          <h3>Family Plan</h3>
+          <p>All Premium features for up to 4 users.</p>
+          <strong>£12.99 / month</strong>
+        </div>
+      </div>
+
+      <h3 style="text-align:center; color:#555; margin-top:1.5rem;">Subscribe via:</h3>
+      <ul>
+        <li><a href="https://ko-fi.com/yourpage" target="_blank">Ko-fi</a></li>
+        <li><a href="https://paypal.me/yourpage" target="_blank">PayPal</a></li>
+        <li><a href="https://venmo.com/yourpage" target="_blank">Venmo</a></li>
+      </ul>
+
+      <p style="text-align:center; font-size:0.9rem; color:#888; margin-top:1rem;">
+        * Please have a parent or guardian assist with payments.
+      </p>
+    </div>
+  </div>
+
 <script>
   const ADMIN_PANEL_PASSWORD = 'puzzleadmin11#';
-  const API_URL = 'https://script.google.com/macros/s/AKfycbyYSddxocaCuzUIEdgi5RbO4KUa7OPoq9LTIg2hDdOcr-QchPqUxkUAmg6zEOJNB1tdwQ/exec';
+  const API_URL = 'YOUR_SCRIPT_URL_HERE'; // <-- Replace with your Apps Script Web App URL
 
   // Cached user data
   let users = [];
@@ -203,7 +331,11 @@
   const userList = document.getElementById('userList');
   const adminLogoutBtn = document.getElementById('adminLogoutBtn');
 
-  // Utility: Fetch user list from backend
+  const signupBtn = document.getElementById('signupBtn');
+  const signupModal = document.getElementById('signupModal');
+  const closeSignup = document.getElementById('closeSignup');
+
+  // Fetch users from backend
   async function fetchUsers() {
     try {
       const resp = await fetch(`${API_URL}?action=listUsers`);
@@ -221,7 +353,7 @@
     }
   }
 
-  // Render user list in admin panel
+  // Render users in admin panel
   function renderUserList() {
     if (users.length === 0) {
       userList.innerHTML = '<p>No users found.</p>';
@@ -250,69 +382,145 @@
     });
   }
 
-  //
-<!-- Add this button somewhere on your page -->
-<button id="signupBtn" style="background:#28a745; color:white; padding:0.6rem 1rem; border:none; border-radius:6px; cursor:pointer; font-weight:700; margin-top:1rem;">
-  Sign Up / Subscribe
-</button>
+  // Add user via backend
+  async function addUser(username, password) {
+    if (!username || !password) {
+      alert('Please enter username and password.');
+      return;
+    }
+    try {
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=addUser&key=${encodeURIComponent(ADMIN_PANEL_PASSWORD)}&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`
+      });
+      const data = await resp.json();
+      if (data.success) {
+        alert(`User "${username}" added.`);
+        newUserName.value = '';
+        newUserPass.value = '';
+        await fetchUsers();
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+    } catch (e) {
+      alert('Network error while adding user.');
+      console.error(e);
+    }
+  }
 
-<!-- Signup Modal -->
-<div id="signupModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); 
-  justify-content:center; align-items:center; z-index:1100;">
-  <div style="background:white; border-radius:10px; padding:2rem; max-width:400px; width:90%; position:relative; box-shadow:0 0 20px rgba(0,0,0,0.3);">
-    <button id="closeSignup" style="position:absolute; top:10px; right:15px; background:none; border:none; font-size:24px; font-weight:bold; cursor:pointer; color:#555;">&times;</button>
-    <h2 style="color:#28a745; margin-top:0; text-align:center;">Choose Your Subscription Plan</h2>
+  // Remove user via backend
+  async function removeUser(username) {
+    try {
+      const resp = await fetch(API_URL, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `action=removeUser&key=${encodeURIComponent(ADMIN_PANEL_PASSWORD)}&username=${encodeURIComponent(username)}`
+      });
+      const data = await resp.json();
+      if (data.success) {
+        alert(`User "${username}" removed.`);
+        await fetchUsers();
+      } else {
+        alert('Error: ' + (data.error || 'Unknown error'));
+      }
+    } catch (e) {
+      alert('Network error while removing user.');
+      console.error(e);
+    }
+  }
 
-    <div style="margin-top:1rem;">
-      <div style="border:1px solid #ddd; border-radius:8px; padding:1rem; margin-bottom:1rem;">
-        <h3 style="margin:0; color:#333;">Basic Plan</h3>
-        <p style="margin:0.3rem 0;">Access to monthly digital puzzle packs.</p>
-        <strong>£3.99 / month</strong>
-      </div>
+  // Login check
+  loginBtn.addEventListener('click', async () => {
+    loginMsg.textContent = '';
+    const username = loginUsername.value.trim();
+    const password = loginPassword.value.trim();
 
-      <div style="border:1px solid #ddd; border-radius:8px; padding:1rem; margin-bottom:1rem;">
-        <h3 style="margin:0; color:#333;">Premium Plan</h3>
-        <p style="margin:0.3rem 0;">Includes Basic + exclusive bonus puzzles and hints.</p>
-        <strong>£6.99 / month</strong>
-      </div>
+    if (!username || !password) {
+      loginMsg.textContent = 'Please enter username and password.';
+      return;
+    }
 
-      <div style="border:1px solid #ddd; border-radius:8px; padding:1rem;">
-        <h3 style="margin:0; color:#333;">Family Plan</h3>
-        <p style="margin:0.3rem 0;">All Premium features for up to 4 users.</p>
-        <strong>£12.99 / month</strong>
-      </div>
-    </div>
+    try {
+      // Fetch users fresh to be sure
+      const resp = await fetch(`${API_URL}?action=listUsers`);
+      const data = await resp.json();
+      if (!data.users) {
+        loginMsg.textContent = 'Error fetching user data.';
+        return;
+      }
+      const user = data.users.find(u => u.username === username);
+      if (!user) {
+        loginMsg.textContent = 'Invalid username or password.';
+        return;
+      }
+      if (user.password !== password) {
+        loginMsg.textContent = 'Invalid username or password.';
+        return;
+      }
+      loginMsg.style.color = 'green';
+      loginMsg.textContent = `Welcome, ${username}! You are logged in.`;
+      // TODO: Redirect or show user area here
+    } catch (e) {
+      loginMsg.textContent = 'Error during login.';
+      console.error(e);
+    }
+  });
 
-    <h3 style="margin-top:1.5rem; text-align:center; color:#555;">Subscribe via:</h3>
-    <ul style="list-style:none; padding:0; text-align:center; margin-top:0.5rem;">
-      <li><a href="https://ko-fi.com/yourpage" target="_blank" style="color:#29abe0; text-decoration:none; font-weight:700;">Ko-fi</a></li>
-      <li><a href="https://paypal.me/yourpage" target="_blank" style="color:#0070ba; text-decoration:none; font-weight:700;">PayPal</a></li>
-      <li><a href="https://venmo.com/yourpage" target="_blank" style="color:#3d95ce; text-decoration:none; font-weight:700;">Venmo</a></li>
-    </ul>
+  // Admin panel open
+  adminBtn.addEventListener('click', () => {
+    adminModal.style.display = 'flex';
+    adminPassInput.value = '';
+    adminLoginMsg.textContent = '';
+    adminContent.style.display = 'none';
+  });
 
-    <p style="text-align:center; font-size:0.9rem; color:#888; margin-top:1rem;">
-      * Please have a parent or guardian assist with payments.
-    </p>
-  </div>
-</div>
+  // Admin panel close
+  closeAdmin.addEventListener('click', () => {
+    adminModal.style.display = 'none';
+  });
 
-<script>
-  const signupBtn = document.getElementById('signupBtn');
-  const signupModal = document.getElementById('signupModal');
-  const closeSignup = document.getElementById('closeSignup');
+  // Unlock admin
+  adminLoginBtn.addEventListener('click', async () => {
+    const pass = adminPassInput.value;
+    if (pass !== ADMIN_PANEL_PASSWORD) {
+      adminLoginMsg.textContent = 'Wrong admin password.';
+      return;
+    }
+    adminLoginMsg.textContent = '';
+    adminContent.style.display = 'block';
+    await fetchUsers();
+  });
 
+  // Add user button
+  addUserBtn.addEventListener('click', () => {
+    addUser(newUserName.value.trim(), newUserPass.value.trim());
+  });
+
+  // Remove user handled in renderUserList buttons
+
+  // Admin logout locks the panel
+  adminLogoutBtn.addEventListener('click', () => {
+    adminContent.style.display = 'none';
+    adminPassInput.value = '';
+    adminLoginMsg.textContent = '';
+  });
+
+  // Close admin modal when clicking outside content
+  adminModal.addEventListener('click', e => {
+    if (e.target === adminModal) adminModal.style.display = 'none';
+  });
+
+  // Signup modal open/close
   signupBtn.addEventListener('click', () => {
     signupModal.style.display = 'flex';
   });
-
   closeSignup.addEventListener('click', () => {
     signupModal.style.display = 'none';
   });
-
-  // Close modal if user clicks outside the content
-  signupModal.addEventListener('click', (e) => {
-    if (e.target === signupModal) {
-      signupModal.style.display = 'none';
-    }
+  signupModal.addEventListener('click', e => {
+    if (e.target === signupModal) signupModal.style.display = 'none';
   });
 </script>
+</body>
+</html>
