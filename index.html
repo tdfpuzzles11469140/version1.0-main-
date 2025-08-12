@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Digital Puzzle Club Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 400px;
+      margin: 2rem auto;
+      background: #f7faff;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      color: #2b8bf2;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: 600;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.6rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+    button {
+      margin-top: 1.2rem;
+      padding: 0.6rem 1rem;
+      background-color: #2b8bf2;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+    }
+    button:hover {
+      background-color: #1a6ad8;
+    }
+    .message {
+      margin-top: 1rem;
+      font-weight: 600;
+      color: red;
+      text-align: center;
+      min-height: 1.2em;
+    }
+    #adminBtn {
+      background-color: #555;
+      margin-top: 1rem;
+      width: auto;
+      padding: 0.4rem 1rem;
+      border-radius: 6px;
+    }
+    /* Admin modal styles */
+    #adminModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right:0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #adminModalContent {
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 10px;
+      width: 350px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.25);
+      position: relative;
+    }
+    #adminModalContent h2 {
+      margin-top: 0;
+      color: #2b8bf2;
+      text-align: center;
+    }
+    #closeAdmin {
+      position: absolute;
+      top: 10px; right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #888;
+    }
+    #closeAdmin:hover {
+      color: #000;
+    }
+    .user-list {
+      margin-top: 1rem;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #ddd;
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+    .user-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.3rem;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid #eee;
+    }
+    .user-row span {
+      font-weight: 600;
+    }
+    .remove-btn {
+      background: #e74c3c;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 0 8px;
+      font-weight: 700;
+    }
+    .remove-btn:hover {
+      background: #c0392b;
+    }
+    .input-group {
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Digital Puzzle Club</h1>
+
+  <label for="loginUsername">Username:</label>
+  <input type="text" id="loginUsername" autocomplete="off" />
+
+  <label for="loginPassword">Password:</label>
+  <input type="password" id="loginPassword" autocomplete="off" />
+
+  <button id="loginBtn">Log In</button>
+
+  <div class="message" id="loginMsg"></div>
+
+  <button id="adminBtn">Admin Panel</button>
+
+  <!-- Admin Modal -->
+  <div id="adminModal">
+    <div id="adminModalContent">
+      <span id="closeAdmin">&times;</span>
+      <h2>Admin Panel</h2>
+
+      <label for="adminPassInput">Enter Admin Password:</label>
+      <input type="password" id="adminPassInput" autocomplete="off" />
+      <button id="adminLoginBtn">Unlock Admin</button>
+      <div class="message" id="adminLoginMsg"></div>
+
+      <div id="adminContent" style="display:none;">
+        <div class="input-group">
+          <label for="newUserName">New Username:</label>
+          <input type="text" id="newUserName" autocomplete="off" />
+        </div>
+        <div class="input-group">
+          <label for="newUserPass">New Password:</label>
+          <input type="text" id="newUserPass" autocomplete="off" />
+        </div>
+        <button id="addUserBtn">Add User</button>
+
+        <h3>Existing Users</h3>
+        <div class="user-list" id="userList"></div>
+
+        <button id="adminLogoutBtn" style="background:#555; margin-top:1rem;">Lock Admin Panel</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const ADMIN_PANEL_PASSWORD = 'puzzleadmin11#';
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyYSddxocaCuzUIEdgi5RbO4KUa7OPoq9LTIg2hDdOcr-QchPqUxkUAmg6zEOJNB1tdwQ/exec';
+
+  // Cached user data
+  let users = [];
+
+  // Elements
+  const loginUsername = document.getElementById('loginUsername');
+  const loginPassword = document.getElementById('loginPassword');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginMsg = document.getElementById('loginMsg');
+  const adminBtn = document.getElementById('adminBtn');
+
+  const adminModal = document.getElementById('adminModal');
+  const closeAdmin = document.getElementById('closeAdmin');
+  const adminPassInput = document.getElementById('adminPassInput');
+  const adminLoginBtn = document.getElementById('adminLoginBtn');
+  const adminLoginMsg = document.getElementById('adminLoginMsg');
+  const adminContent = document.getElementById('adminContent');
+  const newUserName = document.getElementById('newUserName');
+  const newUserPass = document.getElementById('newUserPass');
+  const addUserBtn = document.getElementById('addUserBtn');
+  const userList = document.getElementById('userList');
+  const adminLogoutBtn = document.getElementById('adminLogoutBtn');
+
+  // Utility: Fetch user list from backend
+  async function fetchUsers() {
+    try {
+      const resp = await fetch(`${API_URL}?action=listUsers`);
+      const data = await resp.json();
+      if (data.users) {
+        users = data.users;
+        renderUserList();
+      } else {
+        users = [];
+        userList.innerHTML = '<p>Error loading users.</p>';
+      }
+    } catch (e) {
+      userList.innerHTML = '<p>Error connecting to server.</p>';
+      console.error(e);
+    }
+  }
+
+  // Render user list in admin panel
+  function renderUserList() {
+    if (users.length === 0) {
+      userList.innerHTML = '<p>No users found.</p>';
+      return;
+    }
+    userList.innerHTML = '';
+    users.forEach(u => {
+      const div = document.createElement('div');
+      div.className = 'user-row';
+
+      const span = document.createElement('span');
+      span.textContent = u.username;
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Remove';
+      btn.className = 'remove-btn';
+      btn.onclick = () => {
+        if (confirm(`Remove user "${u.username}"?`)) {
+          removeUser(u.username);
+        }
+      };
+
+      div.appendChild(span);
+      div.appendChild(btn);
+      userList.appendChild(div);
+    });
+  }
+
+  //
