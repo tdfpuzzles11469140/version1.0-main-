@@ -215,6 +215,57 @@
       width: fit-content;
       min-width: 180px;
     }
+
+    /* Downloads modal styles */
+    #downloadsModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+      z-index: 1200;
+    }
+    #downloadsModalContent {
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 10px;
+      width: 350px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    #closeDownloads {
+      position: absolute;
+      top: 10px; right: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #888;
+    }
+    #closeDownloads:hover {
+      color: #000;
+    }
+    #downloadsModalContent h2 {
+      margin-top: 0;
+      color: #2b8bf2;
+      text-align: center;
+    }
+    #downloadsModalContent ul {
+      padding-left: 1.2rem;
+    }
+    #downloadsModalContent ul li {
+      margin-bottom: 0.6rem;
+    }
+    #downloadsModalContent ul li a {
+      color: #2b8bf2;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    #downloadsModalContent ul li a:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -235,6 +286,9 @@
 
   <!-- Signup Button below the main login box -->
   <button id="signupBtn">Sign Up / Subscribe</button>
+
+  <!-- New Downloads Button below the signup button -->
+  <button id="downloadsBtn" style="margin-top: 1rem; background:#ff9800;">Show All Available Downloads</button>
 
   <!-- Admin Modal -->
   <div id="adminModal">
@@ -305,6 +359,19 @@
     </div>
   </div>
 
+  <!-- Downloads Modal -->
+  <div id="downloadsModal">
+    <div id="downloadsModalContent">
+      <span id="closeDownloads">&times;</span>
+      <h2>Available Downloads</h2>
+      <ul>
+        <li><a href="https://example.com/puzzle-pack1.zip" target="_blank" rel="noopener">Puzzle Pack 1</a></li>
+        <li><a href="https://example.com/puzzle-pack2.zip" target="_blank" rel="noopener">Puzzle Pack 2</a></li>
+        <li><a href="https://example.com/puzzle-pack3.zip" target="_blank" rel="noopener">Puzzle Pack 3</a></li>
+      </ul>
+    </div>
+  </div>
+
 <script>
   const ADMIN_PANEL_PASSWORD = 'puzzleadmin11#';
   const API_URL = 'https://script.google.com/macros/s/AKfycbwS6rYw7J002mFty218Bdh2ddS1ehjUTYmcG_G1UHrssNcyKqX3Ykhj1_HbZvNZX7x63g/exec';
@@ -332,6 +399,10 @@
   const signupBtn = document.getElementById('signupBtn');
   const signupModal = document.getElementById('signupModal');
   const closeSignup = document.getElementById('closeSignup');
+
+  const downloadsBtn = document.getElementById('downloadsBtn');
+  const downloadsModal = document.getElementById('downloadsModal');
+  const closeDownloads = document.getElementById('closeDownloads');
 
   async function fetchUsers() {
     try {
@@ -503,6 +574,16 @@
   });
   signupModal.addEventListener('click', e => {
     if (e.target === signupModal) signupModal.style.display = 'none';
+  });
+
+  downloadsBtn.addEventListener('click', () => {
+    downloadsModal.style.display = 'flex';
+  });
+  closeDownloads.addEventListener('click', () => {
+    downloadsModal.style.display = 'none';
+  });
+  downloadsModal.addEventListener('click', e => {
+    if (e.target === downloadsModal) downloadsModal.style.display = 'none';
   });
 </script>
 </body>
